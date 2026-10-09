@@ -1,0 +1,67 @@
+import heapq
+
+start = (2, 8, 3,
+         1, 6, 4,
+         7, 0, 5)
+
+goal = (1, 2, 3,
+        8, 0, 4,
+        7, 6, 5)
+
+def heuristic(state):
+    count = 0
+    for i in range(9):
+        if state[i] != 0 and state[i] != goal[i]:
+            count += 1
+    return count
+
+
+def get_neighbors(state):
+    neighbors = []
+    zero = state.index(0)
+    row, col = divmod(zero, 3)
+
+    moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+    for dr, dc in moves:
+        nr, nc = row + dr, col + dc
+
+        if 0 <= nr < 3 and 0 <= nc < 3:
+            pos = nr * 3 + nc
+            new_state = list(state)
+            new_state[zero], new_state[pos] = (
+                new_state[pos], new_state[zero]
+            )
+            neighbors.append(tuple(new_state))
+
+    return neighbors
+
+# Greedy Heuristic Search
+def solve(start):
+    pq = [(heuristic(start), start, [start])]
+    visited = {start}
+
+    while pq:
+        h, state, path = heapq.heappop(pq)
+
+        if state == goal:
+            print("Goal reached!")
+            print("Number of moves:", len(path) - 1)
+
+            for step in path:
+                for i in range(0, 9, 3):
+                    print(step[i:i+3])
+                print()
+            return
+
+        for neighbor in get_neighbors(state):
+            if neighbor not in visited:
+                visited.add(neighbor)
+                new_h = heuristic(neighbor)
+                heapq.heappush(
+                    pq, (new_h, neighbor, path + [neighbor])
+                )
+
+    print("Goal not found!")
+
+solve(start)
